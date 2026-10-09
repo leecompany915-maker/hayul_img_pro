@@ -1,7 +1,5 @@
 import sqlite3
 from flask import Flask,redirect,render_template,url_for,request,flash,session,send_file
-import PIL			
-from PIL import Image
 import io	
 
 conn = sqlite3.connect("hayul.db")
