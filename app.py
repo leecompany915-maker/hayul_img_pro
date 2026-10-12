@@ -86,7 +86,7 @@ def view():
 
     conn.close()
 
-    return render_template('view.html', script=script, img_name=fl_name + ".png", title=title)
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
