@@ -39,41 +39,42 @@ def view():
     # 이미지를 바이너리(BLOB)로 읽기
     image_bytes = file.read()
 
-    # 요청마다 DB 연결 및 종료 처리
+    # 데이터베이스 연결 및 저장
     conn = sqlite3.connect("hayul.db")
     cur = conn.cursor()
     
-    # 테이블 이름을 hayul로 일치시킴
     sql = 'INSERT INTO hayul (title, scr, data) VALUES (?, ?, ?)'
-    user_data = (title, script, image_bytes)
-
-    cur.execute(sql, user_data)
+    cur.execute(sql, (title, script, image_bytes))
     conn.commit()
-    cur.execute("SELECT data FROM hayul WHERE id = 1")
+    
+    # 방금 삽입된 데이터의 id 가져오기
+    last_id = cur.lastrowid
+
+    # 최신 데이터 또는 방금 넣은 데이터 조회
+    cur.execute("SELECT data FROM hayul WHERE id = ?", (last_id,))
     row = cur.fetchone()
+
+    fl_name = f"hayul_{last_id}"
+    
+    # Render 환경에서도 안전한 static 폴더 경로 설정 (상대 경로 활용)
+    static_folder = os.path.join(app.root_path, 'static')
+    os.makedirs(static_folder, exist_ok=True) # 폴더가 없으면 자동 생성
+    
+    save_path = os.path.join(static_folder, fl_name + ".png")
 
     if row:
         blob_data = row[0]
-
-        # 3-A. Pillow(PIL)를 이용해 이미지 객체로 변환하여 확인
-        image = Image.open(BytesIO(blob_data))# 이미지Viewer로 표시
-
-        # 3-B. 혹은 새로운 이미지 파일로 다시 저장하기
-        fl_name="hayul1"
-        save_path = os.path.join('/home/lee/hayul/static', fl_name+".png")
-        with open(save_path, "wb") as output_file:
-            output_file.write(blob_data)
+        try:
+            # Pillow를 이용해 이미지 검증 및 저장
+            image = Image.open(BytesIO(blob_data))
+            with open(save_path, "wb") as output_file:
+                output_file.write(blob_data)
+        except Exception as e:
+            print(f"이미지 처리 중 오류 발생: {e}")
 
     conn.close()
 
-    # 필요시 서버 폴더에 파일 저장
-    # if file:
-    #     file.seek(0) # 읽어들인 포인터 초기화
-    #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    #     file.save(filepath)
-
-    return render_template('view.html', script=script, img_name=fl_name+".png", title=title)
-
+    return render_template('view.html', script=script, img_name=fl_name + ".png", title=title)
 
 if __name__ == "__main__":
-     app.run(host="0.0.0.0",debug=True)
+    app.run(host="0.0.0.0", debug=True)
