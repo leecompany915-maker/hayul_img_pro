@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>upload</title>
+</head>
+<body>
+    <form action="/uplo" method="post" enctype="multipart/form-data">
+      <!--method = "get" 은 주소창에 기록이남고 넘어감
+          method = "post" 는 정보를 숨기고 넘어감-->
+      title : <input type="text" name = "title">
+      img : <input type="file" name = "image">
+      scr : <input type="text" name="script"><br>
+      <input type="submit" value="전송">
+</body>
+</html>
