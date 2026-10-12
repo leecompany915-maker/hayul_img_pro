@@ -19,8 +19,20 @@ conn.commit()
 conn.close()
 app = Flask(__name__)
 @app.route("/")
-def index():
-     return render_template("index.html")
+def index(): 
+     # 1. 데이터베이스 연결 및 커서 생성
+    conn = sqlite3.connect('hayul.db')
+    cursor = conn.cursor()
+
+    # 2. SQL 쿼리 실행
+    cursor.execute("SELECT id,title,scr FROM hayul")
+
+    # 3. fetchall()로 전체 데이터 가져오기
+    rows = cursor.fetchall()
+    conn.close()
+    return render_template('index.html', data = rows)
+        
+
 @app.route('/upload')
 def upload():
      return render_template("upload.html")
@@ -54,7 +66,7 @@ def view():
     cur.execute("SELECT data FROM hayul WHERE id = ?", (last_id,))
     row = cur.fetchone()
 
-    fl_name = f"hayul_{last_id}"
+    fl_name = str(last_id)
     
     # Render 환경에서도 안전한 static 폴더 경로 설정 (상대 경로 활용)
     static_folder = os.path.join(app.root_path, 'static')
